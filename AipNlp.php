@@ -16,7 +16,10 @@
 */
 
 require_once 'lib/AipBase.php';
-class AipNlp extends AipBase {
+require_once 'AipNlpUtf8.php';
+
+class AipNlp extends AipBase
+{
 
     /**
      * 词法分析 lexer api url
@@ -85,12 +88,6 @@ class AipNlp extends AipBase {
     private $topicUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/topic';
 
     /**
-     * 文本纠错 ecnet api url
-     * @var string
-     */
-    private $ecnetUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/ecnet';
-
-    /**
      * 对话情绪识别接口 emotion api url
      * @var string
      */
@@ -103,12 +100,52 @@ class AipNlp extends AipBase {
     private $newsSummaryUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/news_summary';
 
     /**
+     * 地址识别接口 address api url
+     * @var string
+     */
+    private $addressUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/address';
+
+    private $commentTagCustomUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v2/comment_tag_custom';
+    private $sentimentClassifyCustomUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/sentiment_classify_custom';
+    private $coupletsUrl = 'https://aip.baidubce.com/rpc/2.0/creation/v1/couplets';
+    private $poemUrl = 'https://aip.baidubce.com/rpc/2.0/creation/v1/poem';
+    private $entityLevelSentimentUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/entity_level_sentiment';
+    private $entityLevelSentimentAddUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/entity_level_sentiment/add';
+    private $entityLevelSentimentDeleteUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/entity_level_sentiment/delete';
+    private $entityLevelSentimentDeleteRepoUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/entity_level_sentiment/delete_repo';
+    private $entityLevelSentimentListUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/entity_level_sentiment/list';
+    private $entityLevelSentimentQueryUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/entity_level_sentiment/query';
+    private $topicPhraseUrl = 'https://aip.baidubce.com/rpc/2.0/creation/v1/topic_phrase';
+    private $cvparserUrl = 'https://aip.baidubce.com/rpc/2.0/recruitment/v1/cvparser';
+    private $personPostUrl = 'https://aip.baidubce.com/rpc/2.0/recruitment/v1/person_post';
+    private $personasUrl = 'https://aip.baidubce.com/rpc/2.0/recruitment/v1/personas';
+    private $titlepredictorUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/titlepredictor';
+    private $depParserV2Url = 'https://aip.baidubce.com/rpc/2.0/nlp/v2/depparser';
+    private $blessCreationUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/bless_creation';
+    private $entityAnalysisUrl = 'https://aip.baidubce.com/rpc/2.0/nlp/v1/entity_analysis';
+
+    private $aipNlpUtf8Client;
+
+
+    public function __construct($appId, $apiKey, $secretKey) {
+        parent::__construct($appId, $apiKey, $secretKey);
+        $this->aipNlpUtf8Client = new AipNlpUtf8($appId, $apiKey, $secretKey);
+    }
+
+
+    /**
      * 格式化结果
      * @param $content string
      * @return mixed
      */
-    protected function proccessResult($content){
-        return json_decode(mb_convert_encoding($content, 'UTF8', 'GBK'), true, 512, JSON_BIGINT_AS_STRING);
+    protected function proccessResult($content)
+    {
+        $result = null;
+        $result = json_decode(mb_convert_encoding($content, 'UTF8', 'GBK'), true, 512, JSON_BIGINT_AS_STRING);
+        if ($result == null) {
+            $result = json_decode($content, true, 512, JSON_BIGINT_AS_STRING);
+        }
+        return $result;
     }
 
     /**
@@ -119,10 +156,11 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function lexer($text, $options=array()){
+    public function lexer($text, $options = array())
+    {
 
         $data = array();
-        
+
         $data['text'] = $text;
 
         $data = array_merge($data, $options);
@@ -139,10 +177,11 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function lexerCustom($text, $options=array()){
+    public function lexerCustom($text, $options = array())
+    {
 
         $data = array();
-        
+
         $data['text'] = $text;
 
         $data = array_merge($data, $options);
@@ -160,16 +199,9 @@ class AipNlp extends AipBase {
      *   mode 模型选择。默认值为0，可选值mode=0（对应web模型）；mode=1（对应query模型）
      * @return array
      */
-    public function depParser($text, $options=array()){
-
-        $data = array();
-        
-        $data['text'] = $text;
-
-        $data = array_merge($data, $options);
-        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
-
-        return $this->request($this->depParserUrl, $data);
+    public function depParser($text, $options = array())
+    {
+        return $this->aipNlpUtf8Client->depParser($text, $options);
     }
 
     /**
@@ -180,10 +212,11 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function wordEmbedding($word, $options=array()){
+    public function wordEmbedding($word, $options = array())
+    {
 
         $data = array();
-        
+
         $data['word'] = $word;
 
         $data = array_merge($data, $options);
@@ -200,10 +233,11 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function dnnlm($text, $options=array()){
+    public function dnnlm($text, $options = array())
+    {
 
         $data = array();
-        
+
         $data['text'] = $text;
 
         $data = array_merge($data, $options);
@@ -222,10 +256,11 @@ class AipNlp extends AipBase {
      *   mode 预留字段，可选择不同的词义相似度模型。默认值为0，目前仅支持mode=0
      * @return array
      */
-    public function wordSimEmbedding($word1, $word2, $options=array()){
+    public function wordSimEmbedding($word1, $word2, $options = array())
+    {
 
         $data = array();
-        
+
         $data['word_1'] = $word1;
         $data['word_2'] = $word2;
 
@@ -245,17 +280,9 @@ class AipNlp extends AipBase {
      *   model 默认为"BOW"，可选"BOW"、"CNN"与"GRNN"
      * @return array
      */
-    public function simnet($text1, $text2, $options=array()){
-
-        $data = array();
-        
-        $data['text_1'] = $text1;
-        $data['text_2'] = $text2;
-
-        $data = array_merge($data, $options);
-        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
-
-        return $this->request($this->simnetUrl, $data);
+    public function simnet($text1, $text2, $options = array())
+    {
+        return $this->aipNlpUtf8Client->simnet($text1, $text2, $options);
     }
 
     /**
@@ -267,10 +294,11 @@ class AipNlp extends AipBase {
      *   type 评论行业类型，默认为4（餐饮美食）
      * @return array
      */
-    public function commentTag($text, $options=array()){
+    public function commentTag($text, $options = array())
+    {
 
         $data = array();
-        
+
         $data['text'] = $text;
 
         $data = array_merge($data, $options);
@@ -287,10 +315,11 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function sentimentClassify($text, $options=array()){
+    public function sentimentClassify($text, $options = array())
+    {
 
         $data = array();
-        
+
         $data['text'] = $text;
 
         $data = array_merge($data, $options);
@@ -308,17 +337,9 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function keyword($title, $content, $options=array()){
-
-        $data = array();
-        
-        $data['title'] = $title;
-        $data['content'] = $content;
-
-        $data = array_merge($data, $options);
-        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
-
-        return $this->request($this->keywordUrl, $data);
+    public function keyword($title, $content, $options = array())
+    {
+        return $this->aipNlpUtf8Client->keyword($title, $content, $options);
     }
 
     /**
@@ -330,10 +351,11 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function topic($title, $content, $options=array()){
+    public function topic($title, $content, $options = array())
+    {
 
         $data = array();
-        
+
         $data['title'] = $title;
         $data['content'] = $content;
 
@@ -351,16 +373,9 @@ class AipNlp extends AipBase {
      * @description options列表:
      * @return array
      */
-    public function ecnet($text, $options=array()){
-
-        $data = array();
-        
-        $data['text'] = $text;
-
-        $data = array_merge($data, $options);
-        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
-
-        return $this->request($this->ecnetUrl, $data);
+    public function ecnet($text, $options = array())
+    {
+        return $this->aipNlpUtf8Client->ecnet($text, $options);
     }
 
     /**
@@ -372,10 +387,11 @@ class AipNlp extends AipBase {
      *   scene default（默认项-不区分场景），talk（闲聊对话-如度秘聊天等），task（任务型对话-如导航对话等），customer_service（客服对话-如电信/银行客服等）
      * @return array
      */
-    public function emotion($text, $options=array()){
+    public function emotion($text, $options = array())
+    {
 
         $data = array();
-        
+
         $data['text'] = $text;
 
         $data = array_merge($data, $options);
@@ -394,10 +410,11 @@ class AipNlp extends AipBase {
      *   title 字符串（限200字符数）字符串仅支持GBK编码，长度需小于200字符数（即400字节），请输入前确认字符数没有超限，若字符数超长会返回错误。标题在算法中具有重要的作用，若文章确无标题，输入参数的“标题”字段为空即可
      * @return array
      */
-    public function newsSummary($content, $maxSummaryLen, $options=array()){
+    public function newsSummary($content, $maxSummaryLen, $options = array())
+    {
 
         $data = array();
-        
+
         $data['content'] = $content;
         $data['max_summary_len'] = $maxSummaryLen;
 
@@ -405,5 +422,311 @@ class AipNlp extends AipBase {
         $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
 
         return $this->request($this->newsSummaryUrl, $data);
+    }
+
+    /**
+     * 地址识别接口接口
+     *
+     * @param string $text - 待识别的文本内容，不超过1000字节
+     * @param array $options - 可选参数对象，key: value都为string类型
+     * @description options列表:
+     * @return array
+     */
+    public function address($text, $options = array())
+    {
+
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+        $headers['Content-Encoding'] = "GBK";
+
+        return $this->request($this->addressUrl, $data, $headers);
+    }
+
+    /**
+     * 评论观点抽取（定制）
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/ok6z52g8q
+     */
+    public function commentTagCustom($text, $options = array())
+    {
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->commentTagCustomUrl, $data);
+    }
+
+    /**
+     * 情感倾向分析（定制）
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/zk6z52hds
+     */
+    public function sentimentClassifyCustom($text, $options = array())
+    {
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->sentimentClassifyCustomUrl, $data);
+    }
+
+    /**
+     * 智能春联
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Ok53wb6dh
+     */
+    public function couplets($text, $options = array())
+    {
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->coupletsUrl, $data);
+    }
+
+    /**
+     * 智能写诗
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/ak53wc3o3
+     */
+    public function poem($text, $options = array())
+    {
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->poemUrl, $data);
+    }
+
+    /**
+     * 实体抽取与情感倾向分析
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Fk6z52g04
+     */
+    public function entityLevelSentiment($title, $content, $type, $options = array())
+    {
+        $data = array();
+
+        $data['title'] = $title;
+        $data['content'] = $content;
+        $data['type'] = $type;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->entityLevelSentimentUrl, $data);
+    }
+
+    /**
+     * 增加实体/实体库新增
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Fk6z52g04#%E5%AE%9E%E4%BD%93%E5%BA%93%E6%96%B0%E5%A2%9E%E6%8E%A5%E5%8F%A3
+     */
+    public function entityLevelSentimentAdd($repository, $entities, $options = array())
+    {
+        $data = array();
+
+        $data['repository'] = $repository;
+        $data['entities'] = $entities;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->entityLevelSentimentAddUrl, $data);
+    }
+
+    /**
+     * 删除实体/实体名单删除
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Fk6z52g04#%E5%AE%9E%E4%BD%93%E5%90%8D%E5%8D%95%E5%88%A0%E9%99%A4%E6%8E%A5%E5%8F%A3
+     */
+    public function entityLevelSentimentDelete($repository, $entities, $options = array())
+    {
+        $data = array();
+
+        $data['repository'] = $repository;
+        $data['entities'] = $entities;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->entityLevelSentimentDeleteUrl, $data);
+    }
+
+    /**
+     * 删除实体库/实体库删除
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Fk6z52g04#%E5%AE%9E%E4%BD%93%E5%BA%93%E5%88%A0%E9%99%A4%E6%8E%A5%E5%8F%A3
+     */
+    public function entityLevelSentimentDeleteRepo($repositories, $options = array())
+    {
+        $data = array();
+
+        $data['repositories'] = $repositories;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->entityLevelSentimentDeleteRepoUrl, $data);
+    }
+
+    /**
+     * 实体库列表/实体库查询
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Fk6z52g04#%E5%AE%9E%E4%BD%93%E5%BA%93%E6%9F%A5%E8%AF%A2%E6%8E%A5%E5%8F%A3
+     */
+    public function entityLevelSentimentList($options = array())
+    {
+        $data = array();
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->entityLevelSentimentListUrl, $data);
+    }
+
+    /**
+     * 查询实体/实体名单查询
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Fk6z52g04#%E5%AE%9E%E4%BD%93%E5%90%8D%E5%8D%95%E6%9F%A5%E8%AF%A2%E6%8E%A5%E5%8F%A3
+     */
+    public function entityLevelSentimentQuery($repository, $options = array())
+    {
+        $data = array();
+
+        $data['repository'] = $repository;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->entityLevelSentimentQueryUrl, $data);
+    }
+
+    /**
+     * 文章主题短语生成
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/9k53w3qob
+     */
+    public function topicPhrase($title, $summary, $options = array())
+    {
+        return $this->aipNlpUtf8Client->topicPhrase($title, $summary, $options);
+    }
+
+    /**
+     * 智能招聘-简历解析
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Xkahvfeqa
+     */
+    public function recruitmentCvparser($resume, $options = array())
+    {
+        $data = array();
+
+        $data['resume'] = $resume;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->cvparserUrl, $data);
+    }
+
+    /**
+     * 智能招聘-人岗匹配
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/Pkahwzux5
+     */
+    public function recruitmentPersonPost($resume, $job_description, $options = array())
+    {
+        $data = array();
+
+        $data['resume'] = $resume;
+        $data['job_description'] = $job_description;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->personPostUrl, $data);
+    }
+
+    /**
+     * 智能招聘-简历画像
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/5kc1kmz3w
+     */
+    public function recruitmentPersonas($resume, $options = array())
+    {
+        $data = array();
+
+        $data['resume'] = $resume;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->personasUrl, $data);
+    }
+
+    /**
+     * 文章标题生成
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/0kvc1u1eg
+     */
+    public function titlepredictor($doc, $options = array())
+    {
+        $data = array();
+
+        $data['doc'] = $doc;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->titlepredictorUrl, $data);
+    }
+
+    /**
+     * 依存句法分析V2
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/nk6z52eu6
+     */
+    public function depParserV2($text, $options = array())
+    {
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->depParserV2Url, $data);
+    }
+
+    /**
+     * 祝福语生成
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/sl4cg75jk
+     */
+    public function blessCreation($text, $options = array())
+    {
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->blessCreationUrl, $data);
+    }
+
+    /**
+     * 实体分析
+     * 接口文档链接: https://ai.baidu.com/ai-doc/NLP/al631z295
+     */
+    public function entityAnalysis($text, $options = array())
+    {
+        $data = array();
+
+        $data['text'] = $text;
+
+        $data = array_merge($data, $options);
+        $data = mb_convert_encoding(json_encode($data), 'GBK', 'UTF8');
+
+        return $this->request($this->entityAnalysisUrl, $data);
     }
 }

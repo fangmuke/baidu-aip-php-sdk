@@ -17,6 +17,21 @@
 
 require_once 'lib/AipBase.php';
 class AipFace extends AipBase {
+    /**
+     * @var string
+     */
+    private $onlinePictureLiveUrlV4 = 'https://aip.baidubce.com/rest/2.0/face/v4/faceverify';
+
+    /**
+     * @var string
+     */
+    private $faceMatchV4Url = 'https://aip.baidubce.com/rest/2.0/face/v4/mingjing/match';
+
+    /**
+     * @var string
+     */
+    private $verifyUrl = 'https://aip.baidubce.com/rest/2.0/face/v4/mingjing/verify';
+
 
     /**
      * 人脸检测 detect api url
@@ -114,13 +129,13 @@ class AipFace extends AipBase {
      */
     private $videoSessioncodeUrl = 'https://aip.baidubce.com/rest/2.0/face/v1/faceliveness/sessioncode';
 
-    
+    private $facelivenessVerifyV1Url = 'https://aip.baidubce.com/rest/2.0/face/v1/faceliveness/verify';
 
     /**
      * 人脸检测接口
      *
      * @param string $image - 图片信息(**总数据大小应小于10M**)，图片上传方式根据image_type来判断
-     * @param string $imageType - 图片类型 **BASE64**:图片的base64值，base64编码后的图片数据，需urlencode，编码后的图片大小不超过2M；**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)**；FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个
+     * @param string $imageType - 图片类型     <br> **BASE64**:图片的base64值，base64编码后的图片数据，编码后的图片大小不超过2M； <br>**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)； <br>**FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个。
      * @param array $options - 可选参数对象，key: value都为string类型
      * @description options列表:
      *   face_field 包括**age,beauty,expression,face_shape,gender,glasses,landmark,landmark72，landmark150，race,quality,eye_status,emotion,face_type信息**  <br> 逗号分隔. 默认只返回face_token、人脸框、概率和旋转角度
@@ -146,7 +161,7 @@ class AipFace extends AipBase {
      * 人脸搜索接口
      *
      * @param string $image - 图片信息(**总数据大小应小于10M**)，图片上传方式根据image_type来判断
-     * @param string $imageType - 图片类型 **BASE64**:图片的base64值，base64编码后的图片数据，需urlencode，编码后的图片大小不超过2M；**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)**；FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个
+     * @param string $imageType - 图片类型     <br> **BASE64**:图片的base64值，base64编码后的图片数据，编码后的图片大小不超过2M； <br>**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)； <br>**FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个。
      * @param string $groupIdList - 从指定的group中进行查找 用逗号分隔，**上限20个**
      * @param array $options - 可选参数对象，key: value都为string类型
      * @description options列表:
@@ -176,7 +191,7 @@ class AipFace extends AipBase {
      * 人脸搜索 M:N 识别接口
      *
      * @param string $image - 图片信息(**总数据大小应小于10M**)，图片上传方式根据image_type来判断
-     * @param string $imageType - 图片类型 **BASE64**:图片的base64值，base64编码后的图片数据，需urlencode，编码后的图片大小不超过2M；**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)**；FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个
+     * @param string $imageType - 图片类型     <br> **BASE64**:图片的base64值，base64编码后的图片数据，编码后的图片大小不超过2M； <br>**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)； <br>**FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个。
      * @param string $groupIdList - 从指定的group中进行查找 用逗号分隔，**上限20个**
      * @param array $options - 可选参数对象，key: value都为string类型
      * @description options列表:
@@ -205,7 +220,7 @@ class AipFace extends AipBase {
      * 人脸注册接口
      *
      * @param string $image - 图片信息(总数据大小应小于10M)，图片上传方式根据image_type来判断。注：组内每个uid下的人脸图片数目上限为20张
-     * @param string $imageType - 图片类型 **BASE64**:图片的base64值，base64编码后的图片数据，需urlencode，编码后的图片大小不超过2M；**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)**；FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个
+     * @param string $imageType - 图片类型     <br> **BASE64**:图片的base64值，base64编码后的图片数据，编码后的图片大小不超过2M； <br>**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)； <br>**FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个。
      * @param string $groupId - 用户组id（由数字、字母、下划线组成），长度限制128B
      * @param string $userId - 用户id（由数字、字母、下划线组成），长度限制128B
      * @param array $options - 可选参数对象，key: value都为string类型
@@ -235,7 +250,7 @@ class AipFace extends AipBase {
      * 人脸更新接口
      *
      * @param string $image - 图片信息(**总数据大小应小于10M**)，图片上传方式根据image_type来判断
-     * @param string $imageType - 图片类型 **BASE64**:图片的base64值，base64编码后的图片数据，需urlencode，编码后的图片大小不超过2M；**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)**；FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个
+     * @param string $imageType - 图片类型     <br> **BASE64**:图片的base64值，base64编码后的图片数据，编码后的图片大小不超过2M； <br>**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)； <br>**FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个。
      * @param string $groupId - 更新指定groupid下uid对应的信息
      * @param string $userId - 用户id（由数字、字母、下划线组成），长度限制128B
      * @param array $options - 可选参数对象，key: value都为string类型
@@ -459,7 +474,7 @@ class AipFace extends AipBase {
      * 身份验证接口
      *
      * @param string $image - 图片信息(**总数据大小应小于10M**)，图片上传方式根据image_type来判断
-     * @param string $imageType - 图片类型 **BASE64**:图片的base64值，base64编码后的图片数据，需urlencode，编码后的图片大小不超过2M；**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)**；FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个
+     * @param string $imageType - 图片类型     <br> **BASE64**:图片的base64值，base64编码后的图片数据，编码后的图片大小不超过2M； <br>**URL**:图片的 URL地址( 可能由于网络等原因导致下载图片时间过长)； <br>**FACE_TOKEN**: 人脸图片的唯一标识，调用人脸检测接口时，会为每个人脸图片赋予一个唯一的FACE_TOKEN，同一张图片多次检测得到的FACE_TOKEN是同一个。
      * @param string $idCardNumber - 身份证号（真实身份证号号码）
      * @param string $name - utf8，姓名（真实姓名，和身份证号匹配）
      * @param array $options - 可选参数对象，key: value都为string类型
@@ -537,6 +552,89 @@ class AipFace extends AipBase {
         return $this->request($this->matchUrl, json_encode($images), array(
             'Content-Type' => 'application/json',
         ));
+    }
+
+
+    /**
+     * 人脸 - 人脸实名认证V4
+     * 基于姓名和身份证号，调取公安权威数据源人脸图，将当前获取的人脸图片，与此公安数据源人脸图进行对比，得出比对分数，并基于此进行业务判断是否为同一人
+     * @param idCardNumber  身份证件号
+     * @param name  姓名(需要是 utf8 编码)
+     * @param image  图片信息(数据大小应小于10M 分辨率应小于1920*1080)，5.2版本SDK请求时已包含在加密数据data中，无需额外传入
+     * @param array $options - 可选参数对象，key: value都为string类型
+     * @return array
+     */
+    public function faceMingJingVerify($idCardNumber, $name, $image, $options=array()){
+
+        $data = array();
+        if ($options != null) {
+            $data = array_merge($data, $options);
+        }
+
+        $data['id_card_number'] = $idCardNumber;
+        $data['name'] = $name;
+        $data['image'] = $image;
+
+        return $this->request($this->verifyUrl, json_encode($data), array('Content-Type' => 'application/json;charset=utf-8'));
+    }
+
+
+    /**
+     * 人脸 - 人脸对比V4
+     * 用于比对多张图片中的人脸相似度并返回两两比对的得分，可用于判断两张脸是否是同一人的可能性大小
+     * @param image  图片信息(数据大小应小于10M 分辨率应小于1920*1080)，5.2版本SDK请求时已包含在加密数据data中，无需额外传入
+     * @param imageType  图片类型
+     * @param registerImage  图片信息(总数据大小应小于10M)，图片上传方式根据image_type来判断。本图片特指客户服务器上传图片，非加密图片Base64值   
+     * @param registerImageType  图片类型             
+     * @param array $options - 可选参数对象，key: value都为string类型
+     * @return array
+     */
+    public function faceMingJingMatch($image, $imageType, $registerImage, $registerImageType, $options=array()){
+
+        $data = array();
+        if ($options != null) {
+            $data = array_merge($data, $options);
+        }
+
+        $data['image'] = $image;
+        $data['image_type'] = $imageType;
+        $data['register_image'] = $registerImage;
+        $data['register_image_type'] = $registerImageType;
+
+        return $this->request($this->faceMatchV4Url, json_encode($data), array('Content-Type' => 'application/json;charset=utf-8'));
+    }
+
+
+    /**
+     * 人脸 - 在线图片活体V4
+     * 基于单张图片，判断图片中的人脸是否为二次翻拍
+     * @param sdkVersion  sdk版本
+     * @param array $options - 可选参数对象，key: value都为string类型
+     * @return array
+     */
+    public function onlinePictureLiveV4($sdkVersion, $options=array()){
+
+        $data = array();
+        if ($options != null) {
+            $data = array_merge($data, $options);
+        }
+
+        $data['sdk_version'] = $sdkVersion;
+
+        return $this->request($this->onlinePictureLiveUrlV4, json_encode($data), array('Content-Type' => 'application/json;charset=utf-8'));
+    }
+
+    /**
+     * H5视频活体检测
+     * 接口使用文档: https://ai.baidu.com/ai-doc/FACE/lk37c1tag#12-%E8%A7%86%E9%A2%91%E6%B4%BB%E4%BD%93%E6%A3%80%E6%B5%8B%E6%8E%A5%E5%8F%A3
+     */
+    public function facelivenessVerifyV1($videoBase64, $options=array()) {
+        $data = array();
+        if ($options != null) {
+            $data = array_merge($data, $options);
+        }
+        $data['video_base64'] = $videoBase64;
+        return $this->request($this->facelivenessVerifyV1Url, $data, array('Content-Type' => 'application/json'));
     }
 
 }

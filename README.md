@@ -22,7 +22,7 @@
 **Composer安装：**
 
 ```
-  composer require fangmuke/aip-sdk
+  composer require require fangmuke/baidu-api-php-sdk
 ```
 
 **手动安装步骤如下：**

@@ -1,3 +1,4 @@
+> 升级官方最新版v4.16.8
 # 安装PHP SDK
 
 ## 目录结构
@@ -21,7 +22,7 @@
 **Composer安装：**
 
 ```
-  composer require baidu/aip-sdk
+  composer require fangmuke/aip-sdk
 ```
 
 **手动安装步骤如下：**
